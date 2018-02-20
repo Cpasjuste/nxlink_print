@@ -23,6 +23,7 @@ int nx_net_init(const char *ip, short port) {
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (!sock) {
         printf("nx_net_init: socket error: %i (%s)\n", errno, strerror(errno));
+        socketExit();
         return -1;
     }
 
@@ -37,19 +38,12 @@ int nx_net_init(const char *ip, short port) {
         printf("nx_net_init: connect error: %i (%s)\n", errno, strerror(errno));
         nx_net_exit();
     }
+
+    // redirect stdout
+    fflush(stdout);
+    dup2(sock, STDOUT_FILENO);
+
     return ret;
-}
-
-void nx_net_print(const char *str, ...) {
-
-    if (sock) {
-        va_list valist;
-        va_start(valist, str);
-        char buf[512];
-        size_t len = (size_t) vsnprintf(buf, 512, str, valist);
-        send(sock, buf, len, 0);
-        va_end(valist);
-    }
 }
 
 void nx_net_exit() {

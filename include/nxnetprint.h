@@ -11,8 +11,6 @@ extern "C" {
 
 int nx_net_init(const char *ip, short port);
 
-void nx_net_print(const char *str, ...);
-
 void nx_net_exit();
 
 #ifdef __cplusplus
