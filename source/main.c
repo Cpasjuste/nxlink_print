@@ -1,16 +1,24 @@
+#include <switch.h>
 #include <string.h>
 #include <stdio.h>
-
 #include <sys/socket.h>
 #include <sys/errno.h>
 #include <arpa/inet.h>
 #include <zconf.h>
+
+#include "nxnetprint.h"
 
 static int sock = -1;
 
 int nx_net_init(const char *ip, short port) {
 
     struct sockaddr_in srv_addr;
+
+    int ret = socketInitializeDefault();
+    if (ret != 0) {
+        printf("nx_net_init: socketInitialize error: %i\n", ret);
+        return -1;
+    }
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (!sock) {
@@ -20,15 +28,14 @@ int nx_net_init(const char *ip, short port) {
 
     bzero(&srv_addr, sizeof srv_addr);
     srv_addr.sin_family = AF_INET;
-    srv_addr.sin_port = htons(port);
+    srv_addr.sin_port = htons((uint16_t) port);
 
     inet_aton(ip, &srv_addr.sin_addr);
 
-    int ret = connect(sock, (struct sockaddr *) &srv_addr, sizeof(srv_addr));
+    ret = connect(sock, (struct sockaddr *) &srv_addr, sizeof(srv_addr));
     if (ret != 0) {
         printf("nx_net_init: connect error: %i (%s)\n", errno, strerror(errno));
-        shutdown(sock, SHUT_RDWR);
-        sock = -1;
+        nx_net_exit();
     }
     return ret;
 }
@@ -49,5 +56,7 @@ void nx_net_exit() {
 
     if (sock) {
         shutdown(sock, SHUT_RDWR);
+        sock = -1;
+        socketExit();
     }
 }
