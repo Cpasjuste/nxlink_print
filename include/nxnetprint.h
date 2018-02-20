@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-int nx_net_init(const char *ip, int port);
+int nx_net_init(const char *ip, short port);
 
 void nx_net_print(const char *str, ...);
 
