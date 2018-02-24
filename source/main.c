@@ -5,10 +5,29 @@
 #include <sys/errno.h>
 #include <arpa/inet.h>
 #include <zconf.h>
+#include <sys/fcntl.h>
 
 #include "nxnetprint.h"
 
 static int sock = -1;
+
+static int set_socket_nonblocking(int fd) {
+    int rc, flags;
+
+    /* get the socket flags */
+    flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) {
+        return -1;
+    }
+
+    /* add O_NONBLOCK to the socket flags */
+    rc = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    if (rc != 0) {
+        return -1;
+    }
+
+    return 0;
+}
 
 int nx_net_init(const char *ip, short port) {
 
@@ -39,6 +58,7 @@ int nx_net_init(const char *ip, short port) {
         nx_net_exit();
     }
 
+    set_socket_nonblocking(sock);
     // redirect stdout
     fflush(stdout);
     dup2(sock, STDOUT_FILENO);
