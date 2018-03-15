@@ -4,7 +4,7 @@
 #include <sys/socket.h>
 #include <sys/errno.h>
 #include <arpa/inet.h>
-#include <zconf.h>
+#include <unistd.h>
 
 #include "nxnetprint.h"
 
@@ -37,6 +37,7 @@ int nx_net_init(const char *ip, short port) {
     if (ret != 0) {
         printf("nx_net_init: connect error: %i (%s)\n", errno, strerror(errno));
         nx_net_exit();
+        return -1;
     }
 
     // redirect stdout
