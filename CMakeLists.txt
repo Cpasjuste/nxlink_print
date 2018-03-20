@@ -23,3 +23,6 @@ add_library(${PROJECT_NAME} source/main.c)
 target_include_directories(${PROJECT_NAME} PUBLIC include ${DEVKITPRO}/libnx/include)
 target_compile_options(${PROJECT_NAME} PUBLIC ${FLAGS})
 target_link_libraries(${PROJECT_NAME} ${DEVKITPRO}/libnx/lib/libnx.a)
+
+install(TARGETS ${PROJECT_NAME} DESTINATION ${DEVKITPRO}/portlibs/switch/lib)
+install(FILES include/nxlink_print.h DESTINATION ${DEVKITPRO}/portlibs/switch/include)
