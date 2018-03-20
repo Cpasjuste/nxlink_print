@@ -6,37 +6,36 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-#include "nxnetprint.h"
+#include "nxlink_print.h"
 
 static int sock = -1;
 
-int nx_net_init(const char *ip, short port) {
+int nxlink_print_init() {
 
     struct sockaddr_in srv_addr;
 
     int ret = socketInitializeDefault();
     if (ret != 0) {
-        printf("nx_net_init: socketInitialize error: %i\n", ret);
+        printf("nxlink_print_init: socketInitialize error: %i\n", ret);
         return -1;
     }
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (!sock) {
-        printf("nx_net_init: socket error: %i (%s)\n", errno, strerror(errno));
+        printf("nxlink_print_init: socket error: %i (%s)\n", errno, strerror(errno));
         socketExit();
         return -1;
     }
 
     bzero(&srv_addr, sizeof srv_addr);
     srv_addr.sin_family = AF_INET;
-    srv_addr.sin_port = htons((uint16_t) port);
-
-    inet_aton(ip, &srv_addr.sin_addr);
+    srv_addr.sin_addr = __nxlink_host;
+    srv_addr.sin_port = htons(NXLINK_CLIENT_PORT);
 
     ret = connect(sock, (struct sockaddr *) &srv_addr, sizeof(srv_addr));
     if (ret != 0) {
-        printf("nx_net_init: connect error: %i (%s)\n", errno, strerror(errno));
-        nx_net_exit();
+        printf("nxlink_print_init: connect error: %i (%s)\n", errno, strerror(errno));
+        socketExit();
         return -1;
     }
 
@@ -47,11 +46,6 @@ int nx_net_init(const char *ip, short port) {
     return ret;
 }
 
-void nx_net_exit() {
-
-    if (sock) {
-        shutdown(sock, SHUT_RDWR);
-        sock = -1;
-        socketExit();
-    }
+void nxlink_print_exit() {
+    socketExit();
 }
